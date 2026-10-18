@@ -14,6 +14,27 @@ module.exports = (err, req, res, next) => {
     message = 'Malformed JSON in request body';
   }
 
+  // Body over the express.json() size limit
+  if (err.type === 'entity.too.large') {
+    status = 413;
+    message = 'Request body too large';
+  }
+
+  let errors = err.errors;
+
+  // Mongoose errors that would otherwise surface as 500s
+  if (err.name === 'CastError') {
+    status = 400;
+    message = 'Invalid id';
+  } else if (err.name === 'ValidationError' && err.errors && !err.statusCode) {
+    status = 400;
+    message = 'Validation failed';
+    errors = Object.values(err.errors).map((e) => ({ field: e.path, message: e.message }));
+  } else if (err.code === 11000) {
+    status = 409;
+    message = 'Duplicate value';
+  }
+
   if (status >= 500) {
     logger.error(`${req.method} ${req.originalUrl} -> ${status}: ${err.stack || err.message}`);
     // Never leak internals to the client outside development.
@@ -23,6 +44,6 @@ module.exports = (err, req, res, next) => {
   }
 
   const body = { success: false, message };
-  if (err.errors) body.errors = err.errors;
+  if (errors) body.errors = errors;
   res.status(status).json(body);
 };
