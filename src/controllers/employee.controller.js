@@ -1,3 +1,4 @@
+const { matchedData } = require('express-validator');
 const employeeService = require('../services/employee.service');
 
 // GET /api/v1/emp/employees
@@ -8,7 +9,7 @@ exports.list = async (req, res) => {
 
 // POST /api/v1/emp/employees
 exports.create = async (req, res) => {
-  const employee = await employeeService.create(req.user.id, req.body);
+  const employee = await employeeService.create(req.user.id, matchedData(req, { locations: ['body'] }));
   res.status(201).json({ success: true, message: 'Employee created successfully', data: employee });
 };
 
@@ -20,7 +21,7 @@ exports.getOne = async (req, res) => {
 
 // PUT /api/v1/emp/employees/:eid
 exports.update = async (req, res) => {
-  const employee = await employeeService.update(req.user.id, req.params.eid, req.body);
+  const employee = await employeeService.update(req.user.id, req.params.eid, matchedData(req, { locations: ['body'] }));
   res.status(200).json({ success: true, message: 'Employee updated successfully', data: employee });
 };
 
