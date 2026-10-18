@@ -1,0 +1,34 @@
+2026-10-18T15:50:24.423Z [INFO] MongoDB connected (db: comp3123_assignment1)
+2026-10-18T15:50:24.427Z [INFO] Server listening on http://localhost:3000 (development)
+2026-10-18T15:50:26.171Z [INFO] Signup success: ua26338
+2026-10-18T15:50:26.174Z [INFO] POST /api/v1/user/signup 201 455.2ms ip=::1
+2026-10-18T15:50:26.613Z [INFO] Signup success: ub26338
+2026-10-18T15:50:26.614Z [INFO] POST /api/v1/user/signup 201 426.4ms ip=::1
+2026-10-18T15:50:27.050Z [INFO] Login success: ua26338
+2026-10-18T15:50:27.055Z [INFO] POST /api/v1/user/login 200 426.4ms ip=::1
+2026-10-18T15:50:27.496Z [INFO] Login success: ub26338
+2026-10-18T15:50:27.497Z [INFO] POST /api/v1/user/login 200 422.3ms ip=::1
+2026-10-18T15:50:27.517Z [WARN] Auth failed: token missing (GET /api/v1/emp/employees)
+2026-10-18T15:50:27.534Z [WARN] GET /api/v1/emp/employees -> 401: Invalid token
+2026-10-18T15:50:27.534Z [WARN] GET /api/v1/emp/employees 401 1.4ms ip=::1
+2026-10-18T15:50:29.646Z [WARN] Auth failed: token expired (GET /api/v1/emp/employees)
+2026-10-18T15:50:29.779Z [INFO] Employee created: user=6ad4eac2f596bce9aab66625 eid=6ad4eac5f596bce9aab66628
+2026-10-18T15:50:29.779Z [INFO] POST /api/v1/emp/employees 201 5.1ms ip=::1 user=6ad4eac2f596bce9aab66625
+2026-10-18T15:50:29.832Z [INFO] Employee created: user=6ad4eac2f596bce9aab66625 eid=6ad4eac5f596bce9aab66629
+2026-10-18T15:50:29.832Z [INFO] POST /api/v1/emp/employees 201 5.8ms ip=::1 user=6ad4eac2f596bce9aab66625
+2026-10-18T15:50:29.883Z [INFO] GET /api/v1/emp/employees 200 4.6ms ip=::1 user=6ad4eac1f596bce9aab66624
+2026-10-18T15:50:30.005Z [WARN] Access denied: user=6ad4eac1f596bce9aab66624 tried eid=6ad4eac5f596bce9aab66628
+2026-10-18T15:50:30.005Z [WARN] PUT /api/v1/emp/employees/6ad4eac5f596bce9aab66628 -> 403: You do not have access to this employee
+2026-10-18T15:50:30.005Z [WARN] PUT /api/v1/emp/employees/6ad4eac5f596bce9aab66628 403 5.0ms ip=::1 user=6ad4eac1f596bce9aab66624
+2026-10-18T15:50:30.118Z [WARN] Validation failed: GET /api/v1/emp/employees/abc fields=eid
+2026-10-18T15:50:30.118Z [WARN] GET /api/v1/emp/employees/abc -> 400: Validation failed
+2026-10-18T15:50:30.135Z [WARN] Validation failed: POST /api/v1/emp/employees fields=first_name,last_name,email,position,salary,date_of_joining,department
+2026-10-18T15:50:30.308Z [INFO] PUT /api/v1/emp/employees/6ad4eac5f596bce9aab66626 200 11.0ms ip=::1 user=6ad4eac1f596bce9aab66624
+2026-10-18T15:50:30.329Z [INFO] DELETE /api/v1/emp/employees?eid=6ad4eac5f596bce9aab66626 204 5.9ms ip=::1 user=6ad4eac1f596bce9aab66624
+2026-10-18T15:50:30.383Z [WARN] POST /api/v1/emp/employees -> 409: An employee with this email already exists
+2026-10-18T15:50:41.436Z [WARN] POST /api/v1/emp/employees -> 413: Request body too large
+2026-10-18T15:50:50.823Z [WARN] Login failed: nobody
+2026-10-18T15:50:51.259Z [WARN] Login failed: nobody
+2026-10-18T15:50:54.750Z [WARN] Login failed: nobody
+2026-10-18T15:50:54.765Z [WARN] Rate limit exceeded: ::1 POST /api/v1/user/login
+2026-10-18T15:50:54.765Z [WARN] POST /api/v1/user/login 429 0.9ms ip=::1
