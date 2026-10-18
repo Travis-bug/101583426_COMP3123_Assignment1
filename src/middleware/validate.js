@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const ApiError = require('../utils/ApiError');
+const logger = require('../utils/logger');
 
 // Runs after express-validator chains; turns failures into a 400 with per-field errors.
 module.exports = (req, res, next) => {
@@ -7,5 +8,7 @@ module.exports = (req, res, next) => {
   if (result.isEmpty()) return next();
 
   const errors = result.array().map((e) => ({ field: e.path, message: e.msg }));
+  // Field names only; values may be sensitive.
+  logger.warn(`Validation failed: ${req.method} ${req.originalUrl} fields=${[...new Set(errors.map((e) => e.field || 'body'))].join(',')}`);
   throw new ApiError(400, 'Validation failed', errors);
 };
