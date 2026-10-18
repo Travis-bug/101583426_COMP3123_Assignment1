@@ -1,5 +1,6 @@
 const { matchedData } = require('express-validator');
 const employeeService = require('../services/employee.service');
+const ApiError = require('../utils/ApiError');
 
 // GET /api/v1/emp/employees
 exports.list = async (req, res) => {
@@ -21,7 +22,9 @@ exports.getOne = async (req, res) => {
 
 // PUT /api/v1/emp/employees/:eid
 exports.update = async (req, res) => {
-  const employee = await employeeService.update(req.user.id, req.params.eid, matchedData(req, { locations: ['body'] }));
+  const data = matchedData(req, { locations: ['body'] });
+  if (Object.keys(data).length === 0) throw new ApiError(400, 'No valid fields to update');
+  const employee = await employeeService.update(req.user.id, req.params.eid, data);
   res.status(200).json({ success: true, message: 'Employee updated successfully', data: employee });
 };
 
