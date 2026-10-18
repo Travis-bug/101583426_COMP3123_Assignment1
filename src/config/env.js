@@ -14,4 +14,6 @@ module.exports = {
   dbName: 'comp3123_assignment1',
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX) || 10,
+  apiRateLimitMax: Number(process.env.API_RATE_LIMIT_MAX) || 100,
 };
