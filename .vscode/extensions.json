@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "mongodb.mongodb-vscode",
+    "mikestead.dotenv",
+    "Postman.postman-for-vscode"
+  ]
+}
