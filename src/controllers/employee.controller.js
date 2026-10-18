@@ -2,6 +2,13 @@ const { matchedData } = require('express-validator');
 const employeeService = require('../services/employee.service');
 const ApiError = require('../utils/ApiError');
 
+// Only fields that passed a validation chain. Whole-body rules (the "empty body" and
+// "forbidden fields" checks) register under the '' key with the raw body, so drop it.
+const validatedBody = (req) => {
+  const { '': _wholeBody, ...fields } = matchedData(req, { locations: ['body'] });
+  return fields;
+};
+
 // GET /api/v1/emp/employees
 exports.list = async (req, res) => {
   const employees = await employeeService.list(req.user.id);
@@ -10,7 +17,7 @@ exports.list = async (req, res) => {
 
 // POST /api/v1/emp/employees
 exports.create = async (req, res) => {
-  const employee = await employeeService.create(req.user.id, matchedData(req, { locations: ['body'] }));
+  const employee = await employeeService.create(req.user.id, validatedBody(req));
   res.status(201).json({ success: true, message: 'Employee created successfully', data: employee });
 };
 
@@ -22,7 +29,7 @@ exports.getOne = async (req, res) => {
 
 // PUT /api/v1/emp/employees/:eid
 exports.update = async (req, res) => {
-  const data = matchedData(req, { locations: ['body'] });
+  const data = validatedBody(req);
   if (Object.keys(data).length === 0) throw new ApiError(400, 'No valid fields to update');
   const employee = await employeeService.update(req.user.id, req.params.eid, data);
   res.status(200).json({ success: true, message: 'Employee updated successfully', data: employee });
