@@ -1,0 +1,12 @@
+# Local MongoDB for development: `docker compose up -d`
+services:
+  comp3123-mongo:
+    image: mongo:7
+    container_name: comp3123-mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - comp3123-mongo-data:/data/db
+
+volumes:
+  comp3123-mongo-data:
