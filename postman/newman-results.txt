@@ -1,0 +1,306 @@
+(node:75310) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+COMP3123 Assignment 1
+
+❏ 1. Health
+↳ GET /health
+  GET http://localhost:3000/health [200 OK, 1.03kB, 30ms]
+  ✓  Status is 200
+  ✓  database connected
+  ✓  ping ok
+
+❏ 2. Signup
+↳ Signup user A (201)
+  POST http://localhost:3000/api/v1/user/signup [201 Created, 1.2kB, 455ms]
+  ✓  Status is 201
+  ✓  user returned without password
+
+↳ Signup user B (201)
+  POST http://localhost:3000/api/v1/user/signup [201 Created, 1.19kB, 426ms]
+  ✓  Status is 201
+  ✓  user returned without password
+
+↳ Duplicate username (409)
+  POST http://localhost:3000/api/v1/user/signup [409 Conflict, 1.02kB, 7ms]
+  ✓  Status is 409
+  ✓  success is false
+
+↳ Duplicate email (409)
+  POST http://localhost:3000/api/v1/user/signup [409 Conflict, 1.02kB, 5ms]
+  ✓  Status is 409
+  ✓  success is false
+
+↳ Invalid email (400)
+  POST http://localhost:3000/api/v1/user/signup [400 Bad Request, 1.07kB, 3ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for email
+
+↳ Weak password (400)
+  POST http://localhost:3000/api/v1/user/signup [400 Bad Request, 1.15kB, 2ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for password
+
+↳ Missing fields (400)
+  POST http://localhost:3000/api/v1/user/signup [400 Bad Request, 1.17kB, 2ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for username
+  ✓  email and password also reported
+
+❏ 3. Login
+↳ Login A by username (200)
+  POST http://localhost:3000/api/v1/user/login [200 OK, 1.38kB, 427ms]
+  ✓  Status is 200
+  ✓  token returned
+  ✓  password not returned
+
+↳ Login B by email (200)
+  POST http://localhost:3000/api/v1/user/login [200 OK, 1.37kB, 422ms]
+  ✓  Status is 200
+  ✓  token returned
+  ✓  password not returned
+
+↳ Wrong password (401)
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 422ms]
+  ✓  Status is 401
+  ✓  success is false
+  ✓  message is "Invalid credentials"
+
+↳ Unknown user (401)
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 422ms]
+  ✓  Status is 401
+  ✓  success is false
+  ✓  message is "Invalid credentials"
+
+↳ Missing credentials (400)
+  POST http://localhost:3000/api/v1/user/login [400 Bad Request, 1.17kB, 2ms]
+  ✓  Status is 400
+  ✓  validation failed
+
+❏ 4. Employees (User A)
+↳ Create employee A1 (201)
+  POST http://localhost:3000/api/v1/emp/employees [201 Created, 1.36kB, 10ms]
+  ✓  Status is 201
+  ✓  id saved
+  ✓  fields stored
+
+↳ Create employee A2 (201)
+  POST http://localhost:3000/api/v1/emp/employees [201 Created, 1.35kB, 7ms]
+  ✓  Status is 201
+  ✓  id saved
+
+↳ List own employees (200, exactly 2)
+  GET http://localhost:3000/api/v1/emp/employees [200 OK, 1.69kB, 7ms]
+  ✓  Status is 200
+  ✓  exactly 2 employees
+  ✓  both are A's
+
+↳ Get one (200)
+  GET http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88a [200 OK, 1.35kB, 6ms]
+  ✓  Status is 200
+  ✓  correct employee
+
+↳ Update (200)
+  PUT http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88a [200 OK, 1.36kB, 12ms]
+  ✓  Status is 200
+  ✓  fields updated
+
+↳ Create: missing fields (400)
+  POST http://localhost:3000/api/v1/emp/employees [400 Bad Request, 1.34kB, 5ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for first_name
+
+↳ Create: bad email (400)
+  POST http://localhost:3000/api/v1/emp/employees [400 Bad Request, 1.08kB, 6ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for email
+
+↳ Create: salary -5 (400)
+  POST http://localhost:3000/api/v1/emp/employees [400 Bad Request, 1.09kB, 5ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for salary
+
+↳ Create: bad date (400)
+  POST http://localhost:3000/api/v1/emp/employees [400 Bad Request, 1.11kB, 6ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for date_of_joining
+
+↳ No JWT (401)
+  GET http://localhost:3000/api/v1/emp/employees [401 Unauthorized, 1.02kB, 2ms]
+  ✓  Status is 401
+  ✓  success is false
+  ✓  message is "Authentication token missing"
+
+↳ Garbage JWT (401)
+  GET http://localhost:3000/api/v1/emp/employees [401 Unauthorized, 1kB, 2ms]
+  ✓  Status is 401
+  ✓  success is false
+  ✓  message is "Invalid token"
+
+↳ Invalid id abc (400)
+  GET http://localhost:3000/api/v1/emp/employees/abc [400 Bad Request, 1.07kB, 6ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for eid
+
+↳ Nonexistent valid id (404)
+  GET http://localhost:3000/api/v1/emp/employees/507f1f77bcf86cd799439011 [404 Not Found, 1.01kB, 7ms]
+  ✓  Status is 404
+  ✓  success is false
+  ✓  message is "Employee not found"
+
+↳ DELETE without eid (400)
+  DELETE http://localhost:3000/api/v1/emp/employees [400 Bad Request, 1.06kB, 5ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for eid
+
+↳ PUT with $set owner change (400)
+  PUT http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88a [400 Bad Request, 1.01kB, 5ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "No valid fields to update"
+
+❏ 5. Ownership (User B)
+↳ B creates employee (201)
+  POST http://localhost:3000/api/v1/emp/employees [201 Created, 1.35kB, 6ms]
+  ✓  Status is 201
+  ✓  id saved
+
+↳ B lists only own (200)
+  GET http://localhost:3000/api/v1/emp/employees [200 OK, 1.35kB, 6ms]
+  ✓  Status is 200
+  ✓  only B's employee
+
+↳ B GET A's employee (403)
+  GET http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88a [403 Forbidden, 1.03kB, 6ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ B PUT A's employee (403)
+  PUT http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88a [403 Forbidden, 1.03kB, 6ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ B DELETE A's employee (403)
+  DELETE http://localhost:3000/api/v1/emp/employees?eid=6ad4f9cd4625a5749bd5f88a [403 Forbidden, 1.03kB, 5ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ A GET B's employee (403)
+  GET http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88c [403 Forbidden, 1.03kB, 7ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ A PUT B's employee (403)
+  PUT http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88c [403 Forbidden, 1.03kB, 6ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ A DELETE B's employee (403)
+  DELETE http://localhost:3000/api/v1/emp/employees?eid=6ad4f9cd4625a5749bd5f88c [403 Forbidden, 1.03kB, 4ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+❏ 6. Delete
+↳ A deletes own employee (204)
+  DELETE http://localhost:3000/api/v1/emp/employees?eid=6ad4f9cd4625a5749bd5f88b [204 No Content, 850B, 7ms]
+  ✓  Status is 204
+  ✓  empty body
+
+↳ GET deleted employee (404)
+  GET http://localhost:3000/api/v1/emp/employees/6ad4f9cd4625a5749bd5f88b [404 Not Found, 1.01kB, 3ms]
+  ✓  Status is 404
+  ✓  success is false
+  ✓  message is "Employee not found"
+
+❏ 7. Rate limit
+↳ Login attempt 1
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 421ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 2
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 421ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 3
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 422ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 4
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 421ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 5
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 429ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 6
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 423ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 7
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 428ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 8
+  POST http://localhost:3000/api/v1/user/login [401 Unauthorized, 1.01kB, 421ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 9
+  POST http://localhost:3000/api/v1/user/login [429 Too Many Requests, 1.05kB, 2ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 10
+  POST http://localhost:3000/api/v1/user/login [429 Too Many Requests, 1.05kB, 1ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 11 (429)
+  POST http://localhost:3000/api/v1/user/login [429 Too Many Requests, 1.05kB, 1ms]
+  ✓  Status is 429
+  ✓  Retry-After header present
+  ✓  RateLimit header present
+  ✓  message
+
+┌─────────────────────────┬────────────────────┬───────────────────┐
+│                         │           executed │            failed │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              iterations │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│                requests │                 49 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│            test-scripts │                 49 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│      prerequest-scripts │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              assertions │                127 │                 0 │
+├─────────────────────────┴────────────────────┴───────────────────┤
+│ total run duration: 6.7s                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ total data received: 7.83kB (approx)                             │
+├──────────────────────────────────────────────────────────────────┤
+│ average response time: 125ms [min: 1ms, max: 455ms, s.d.: 189ms] │
+└──────────────────────────────────────────────────────────────────┘
