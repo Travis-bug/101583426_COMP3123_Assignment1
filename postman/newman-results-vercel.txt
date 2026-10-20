@@ -1,0 +1,323 @@
+(node:75167) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+COMP3123 Assignment 1
+
+❏ 1. Health
+↳ GET /health
+  GET https://comp3123-assignment1-brown.vercel.app/health [200 OK, 1.14kB, 1653ms]
+  ✓  Status is 200
+  ✓  database connected
+  ✓  ping ok
+
+❏ 2. Signup
+↳ Signup user A (201)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/signup [201 Created, 1.3kB, 585ms]
+  ✓  Status is 201
+  ✓  user returned without password
+
+↳ Signup user B (201)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/signup [201 Created, 1.29kB, 846ms]
+  ✓  Status is 201
+  ✓  user returned without password
+
+↳ Duplicate username and email (409)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/signup [409 Conflict, 1.12kB, 108ms]
+  ✓  Status is 409
+  ✓  success is false
+
+↳ Invalid email (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/signup [400 Bad Request, 1.17kB, 51ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for email
+
+↳ Weak password (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/signup [400 Bad Request, 1.25kB, 59ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for password
+
+↳ Missing fields (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/signup [400 Bad Request, 1.27kB, 50ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for username
+  ✓  email and password also reported
+
+❏ 3. Login
+↳ Login A by username (200)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [200 OK, 1.48kB, 530ms]
+  ✓  Status is 200
+  ✓  token returned
+  ✓  password not returned
+
+↳ Login B by email (200)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [200 OK, 1.47kB, 516ms]
+  ✓  Status is 200
+  ✓  token returned
+  ✓  password not returned
+
+↳ Wrong password (401)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [401 Unauthorized, 1.11kB, 644ms]
+  ✓  Status is 401
+  ✓  success is false
+  ✓  message is "Invalid credentials"
+
+↳ Missing credentials (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [400 Bad Request, 1.27kB, 52ms]
+  ✓  Status is 400
+  ✓  validation failed
+
+❏ 4. Employees (User A)
+↳ Create employee A1 (201)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [201 Created, 1.46kB, 80ms]
+  ✓  Status is 201
+  ✓  id saved
+  ✓  fields stored
+
+↳ Create employee A2 (201)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [201 Created, 1.46kB, 73ms]
+  ✓  Status is 201
+  ✓  id saved
+
+↳ List own employees (200, exactly 2)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [200 OK, 1.79kB, 69ms]
+  ✓  Status is 200
+  ✓  exactly 2 employees
+  ✓  both are A's
+
+↳ Get one (200)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d75f2c6e1538595873 [200 OK, 1.46kB, 174ms]
+  ✓  Status is 200
+  ✓  correct employee
+
+↳ Update (200)
+  PUT https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d75f2c6e1538595873 [200 OK, 1.46kB, 71ms]
+  ✓  Status is 200
+  ✓  fields updated
+
+↳ Create: missing fields (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [400 Bad Request, 1.44kB, 57ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for first_name
+
+↳ Create: bad email (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [400 Bad Request, 1.18kB, 56ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for email
+
+↳ Create: salary -5 (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [400 Bad Request, 1.19kB, 55ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for salary
+
+↳ Create: bad date (400)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [400 Bad Request, 1.21kB, 55ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for date_of_joining
+
+↳ No JWT (401)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [401 Unauthorized, 1.13kB, 52ms]
+  ✓  Status is 401
+  ✓  success is false
+  ✓  message is "Authentication token missing"
+
+↳ Garbage JWT (401)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [401 Unauthorized, 1.11kB, 137ms]
+  ✓  Status is 401
+  ✓  success is false
+  ✓  message is "Invalid token"
+
+↳ Invalid id abc (400)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/abc [400 Bad Request, 1.17kB, 57ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for eid
+
+↳ Nonexistent valid id (404)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/507f1f77bcf86cd799439011 [404 Not Found, 1.11kB, 61ms]
+  ✓  Status is 404
+  ✓  success is false
+  ✓  message is "Employee not found"
+
+↳ DELETE without eid (400)
+  DELETE https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [400 Bad Request, 1.16kB, 56ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "Validation failed"
+  ✓  error reported for eid
+
+↳ PUT with $set owner change (400)
+  PUT https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d75f2c6e1538595873 [400 Bad Request, 1.12kB, 62ms]
+  ✓  Status is 400
+  ✓  success is false
+  ✓  message is "No valid fields to update"
+
+❏ 5. Ownership (User B)
+↳ B creates employee (201)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [201 Created, 1.45kB, 149ms]
+  ✓  Status is 201
+  ✓  id saved
+
+↳ B lists only own (200)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees [200 OK, 1.46kB, 58ms]
+  ✓  Status is 200
+  ✓  only B's employee
+
+↳ B GET A's employee (403)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d75f2c6e1538595873 [403 Forbidden, 1.13kB, 58ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ B PUT A's employee (403)
+  PUT https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d75f2c6e1538595873 [403 Forbidden, 1.13kB, 69ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ B DELETE A's employee (403)
+  DELETE https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees?eid=6ad7d8d75f2c6e1538595873 [403 Forbidden, 1.13kB, 76ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ A GET B's employee (403)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d85f2c6e1538595875 [403 Forbidden, 1.13kB, 57ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ A PUT B's employee (403)
+  PUT https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d85f2c6e1538595875 [403 Forbidden, 1.13kB, 102ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+↳ A DELETE B's employee (403)
+  DELETE https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees?eid=6ad7d8d85f2c6e1538595875 [403 Forbidden, 1.13kB, 59ms]
+  ✓  Status is 403
+  ✓  success is false
+  ✓  message is "You do not have access to this employee"
+
+❏ 6. Delete
+↳ A deletes own employee (204)
+  DELETE https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees?eid=6ad7d8d75f2c6e1538595874 [204 No Content, 951B, 79ms]
+  ✓  Status is 204
+  ✓  empty body
+
+↳ GET deleted employee (404)
+  GET https://comp3123-assignment1-brown.vercel.app/api/v1/emp/employees/6ad7d8d75f2c6e1538595874 [404 Not Found, 1.11kB, 74ms]
+  ✓  Status is 404
+  ✓  success is false
+  ✓  message is "Employee not found"
+
+❏ 7. Rate limit
+↳ Login attempt 1
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [401 Unauthorized, 1.11kB, 514ms]
+  ✓  Status is 401 or 429
+
+↳ Login attempt 2
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 63ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 3
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 66ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 4
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 137ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 5
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 59ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 6
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 55ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 7
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 56ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 8
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 125ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 9
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 102ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 10
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 58ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+
+↳ Login attempt 11 (a 429 must have occurred by now)
+  POST https://comp3123-assignment1-brown.vercel.app/api/v1/user/login [429 Too Many Requests, 1.15kB, 61ms]
+  ✓  Status is 401 or 429
+  ✓  429 has Retry-After header
+  ✓  429 has RateLimit header
+  ✓  429 message
+  ✓  a 429 with Retry-After appeared within the attempts
+
+┌─────────────────────────┬─────────────────────┬────────────────────┐
+│                         │            executed │             failed │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│              iterations │                   1 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│                requests │                  47 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│            test-scripts │                  47 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│      prerequest-scripts │                   1 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│              assertions │                 150 │                  0 │
+├─────────────────────────┴─────────────────────┴────────────────────┤
+│ total run duration: 9s                                             │
+├────────────────────────────────────────────────────────────────────┤
+│ total data received: 7.87kB (approx)                               │
+├────────────────────────────────────────────────────────────────────┤
+│ average response time: 176ms [min: 50ms, max: 1653ms, s.d.: 284ms] │
+└────────────────────────────────────────────────────────────────────┘
