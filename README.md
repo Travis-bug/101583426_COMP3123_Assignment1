@@ -226,6 +226,23 @@ Every error has the same shape. `errors` appears for validation failures.
 
 When MongoDB is down or the ping fails, it returns `503` with `"success": false`, `"status": "degraded"`, and `database.state` / `database.ping` showing what failed.
 
+## Deployment
+
+Live API: https://comp3123-assignment1-brown.vercel.app (health check: https://comp3123-assignment1-brown.vercel.app/health)
+
+The API is hosted on Vercel as a serverless function (`api/index.js` wraps the Express app; `vercel.json` rewrites every path to it, so `/health` and `/api/v1/...` keep their paths). The database is a free MongoDB Atlas M0 cluster.
+
+1. Create an Atlas M0 cluster and a database user. Under Network Access allow `0.0.0.0/0`, because Vercel has no fixed IP.
+2. `npx vercel login`, then `npx vercel link`.
+3. Add these environment variables for Production (`npx vercel env add <NAME> production`): `MONGODB_URI` (the Atlas URI), `JWT_SECRET` (a new random value), `JWT_EXPIRES_IN`, `NODE_ENV`, `AUTH_RATE_LIMIT_MAX`, `API_RATE_LIMIT_MAX`.
+4. `npx vercel --prod`.
+
+Run the collection against the live URL: `npx newman run postman/COMP3123_Assignment1.postman_collection.json --env-var baseUrl=https://comp3123-assignment1-brown.vercel.app` (results in `postman/newman-results-vercel.txt`).
+
+Notes:
+- **Logs**: Vercel's filesystem is read-only, so in production the app logs to the console only. Read them in the Vercel dashboard under Logs. Locally, logs still go to `logs/app.log`.
+- **Rate limiting**: the counter is in memory, so each serverless instance keeps its own count. The limits are per instance rather than global, and a cold start resets them.
+
 ## Testing
 
 - **Collection**: `postman/COMP3123_Assignment1.postman_collection.json` (47 requests, 153 assertions). Import it into Postman, or run it from the terminal. It creates its own users with timestamped names, so it can be run repeatedly.
