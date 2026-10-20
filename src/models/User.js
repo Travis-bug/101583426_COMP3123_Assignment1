@@ -5,10 +5,27 @@ const BCRYPT_ROUNDS = 12;
 
 const userSchema = new mongoose.Schema(
   {
-    username: { type: String, required: true, unique: true, trim: true },
-    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    username: { 
+      type: String, 
+      required: true, 
+      unique: true, 
+      trim: true 
+    },
+
+    email: { 
+      type: String, 
+      required: true, 
+      unique: true, 
+      trim: true, 
+      lowercase: true },
+
     // select: false keeps the hash out of query results unless explicitly requested.
-    password: { type: String, required: true, select: false },
+    password: { 
+      type: String, 
+      required: true, 
+      select: false 
+    },
+
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
