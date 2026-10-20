@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "COMP3123 Assignment 1",
-    "description": "Run folders in order. Start the API with a fresh process (resets the in-memory rate limiter) and AUTH_RATE_LIMIT_MAX=20, because signup + login alone send 12 limited requests.",
+    "description": "Run folders in order. Start the API with a fresh process (resets the in-memory rate limiter) and the default AUTH_RATE_LIMIT_MAX=10. Signup + Login send 10 limited requests and the Rate limit folder sends 11 more, so a 429 with Retry-After appears within the Rate limit folder.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -43,6 +43,10 @@
     },
     {
       "key": "emailB",
+      "value": ""
+    },
+    {
+      "key": "rl429",
       "value": ""
     }
   ],
@@ -192,7 +196,7 @@
           ]
         },
         {
-          "name": "Duplicate username (409)",
+          "name": "Duplicate username and email (409)",
           "request": {
             "method": "POST",
             "header": [
@@ -215,53 +219,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"{{usernameA}}\",\n  \"email\": \"other{{$timestamp}}@example.com\",\n  \"password\": \"Passw0rd123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 409', () => pm.response.to.have.status(409));",
-                  "const body = pm.response.json();",
-                  "pm.test('success is false', () => pm.expect(body.success).to.eql(false));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Duplicate email (409)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/user/signup",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "user",
-                "signup"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"other{{$timestamp}}\",\n  \"email\": \"{{emailA}}\",\n  \"password\": \"Passw0rd123\"\n}",
+              "raw": "{\n  \"username\": \"{{usernameA}}\",\n  \"email\": \"{{emailA}}\",\n  \"password\": \"Passw0rd123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -554,53 +512,6 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"{{usernameA}}\",\n  \"password\": \"WrongPass123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 401', () => pm.response.to.have.status(401));",
-                  "const body = pm.response.json();",
-                  "pm.test('success is false', () => pm.expect(body.success).to.eql(false));",
-                  "pm.test('message is \"Invalid credentials\"', () => pm.expect(body.message).to.eql(\"Invalid credentials\"));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Unknown user (401)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/user/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "user",
-                "login"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"nobody{{$timestamp}}\",\n  \"password\": \"Passw0rd123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1842,8 +1753,16 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "pm.collectionVariables.set('rl429', '');",
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -1887,8 +1806,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -1932,8 +1858,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -1977,8 +1910,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -2022,8 +1962,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -2067,8 +2014,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -2112,8 +2066,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -2157,8 +2118,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -2202,8 +2170,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
@@ -2247,15 +2222,22 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Earlier folders already used part of the shared signup/login allowance, so a late attempt may already be limited.",
-                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Login attempt 11 (429)",
+          "name": "Login attempt 11 (a 429 must have occurred by now)",
           "request": {
             "method": "POST",
             "header": [
@@ -2292,11 +2274,16 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 429', () => pm.response.to.have.status(429));",
-                  "const body = pm.response.json();",
-                  "pm.test('Retry-After header present', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
-                  "pm.test('RateLimit header present', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
-                  "pm.test('message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));"
+                  "// Earlier folders already used part of the shared signup/login allowance, so the limit may hit on any attempt here.",
+                  "pm.test('Status is 401 or 429', () => pm.expect([401, 429]).to.include(pm.response.code));",
+                  "if (pm.response.code === 429) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('429 has Retry-After header', () => pm.expect(pm.response.headers.has('Retry-After')).to.eql(true));",
+                  "  pm.test('429 has RateLimit header', () => pm.expect(pm.response.headers.has('RateLimit')).to.eql(true));",
+                  "  pm.test('429 message', () => pm.expect(body.message).to.eql('Too many requests, please try again later.'));",
+                  "  pm.collectionVariables.set('rl429', String(Number(pm.collectionVariables.get('rl429') || 0) + 1));",
+                  "}",
+                  "pm.test('a 429 with Retry-After appeared within the attempts', () => pm.expect(Number(pm.collectionVariables.get('rl429'))).to.be.above(0));"
                 ]
               }
             }

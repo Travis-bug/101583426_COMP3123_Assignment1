@@ -228,15 +228,15 @@ When MongoDB is down or the ping fails, it returns `503` with `"success": false`
 
 ## Testing
 
-- **Collection**: `postman/COMP3123_Assignment1.postman_collection.json` (49 requests, 127 assertions). Import it into Postman, or run it from the terminal. It creates its own users with timestamped names, so it can be run repeatedly.
-- **Run with newman** against a freshly restarted server:
+- **Collection**: `postman/COMP3123_Assignment1.postman_collection.json` (47 requests, 153 assertions). Import it into Postman, or run it from the terminal. It creates its own users with timestamped names, so it can be run repeatedly.
+- **Run with newman** against a freshly restarted server (default limits):
   ```
-  AUTH_RATE_LIMIT_MAX=20 npm start
+  npm start
   npx newman run postman/COMP3123_Assignment1.postman_collection.json
   ```
-  The signup and login folders alone send 12 requests to the shared auth limiter (default 10), so the full run needs `AUTH_RATE_LIMIT_MAX=20`. The Rate limit folder runs last; restart the server afterwards to reset the in-memory limiter. To check the default limit on its own, restart the server normally and run `npx newman run postman/COMP3123_Assignment1.postman_collection.json --folder "7. Rate limit"`: attempts 1-10 return 401 and attempt 11 returns 429.
-- **Results**: `postman/newman-results.txt` (49 requests, 127 assertions, 0 failed).
-- The collection covers: health; signup (valid, duplicate username, duplicate email, invalid email, weak password, missing fields); login (by username, by email, wrong password, unknown user, missing credentials); employee CRUD and validation errors; missing, garbage and bad-id cases; the two-user ownership test (403 in both directions); delete then 404; and the 429 rate limit.
+  The signup and login folders send 10 requests to the shared auth limiter (limit 10 per 15 minutes), so the limit is reached on the first attempt in the Rate limit folder. That folder sends 11 login attempts and asserts that a 429 with a `Retry-After` header appears within them. The Rate limit folder runs last; restart the server afterwards to reset the in-memory limiter. To check the limit on its own, restart the server and run `npx newman run postman/COMP3123_Assignment1.postman_collection.json --folder "7. Rate limit"`: attempts 1-10 return 401 and attempt 11 returns 429.
+- **Results**: `postman/newman-results.txt` (47 requests, 153 assertions, 0 failed).
+- The collection covers: health; signup (valid, duplicate username and email, invalid email, weak password, missing fields); login (by username, by email, wrong password, missing credentials); employee CRUD and validation errors; missing, garbage and bad-id cases; the two-user ownership test (403 in both directions); delete then 404; and the 429 rate limit.
 
 ### Sample test credentials
 
