@@ -9,6 +9,8 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
+// Behind Vercel's proxy: use the real client IP for req.ip and the rate limiter.
+app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(helmet());
 app.use(requestLogger);
